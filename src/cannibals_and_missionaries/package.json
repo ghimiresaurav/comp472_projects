@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "nodemon": "^3.0.1"
+  },
+  "scripts": {
+    "dev": "nodemon index"
+  },
+  "type": "module"
+}
