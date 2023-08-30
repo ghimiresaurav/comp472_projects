@@ -1,0 +1,19 @@
+{
+  "name": "projects",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "watch-ts": "tsc --watch --preserveWatchOutput",
+    "dev": "nodemon dist/8puzzle/State"
+  },
+  "author": "Saurav Ghimire",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "typescript": "^5.2.2"
+  }
+}
