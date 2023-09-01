@@ -1,34 +1,49 @@
 import Cell from "./Cell";
+import chalk from "chalk";
 
 class State {
-  cells: Cell[];
+  cells: Cell[] = [];
   level: number;
   movingCellIndex: number;
 
-  constructor(lvl: number = 0) {
+  constructor(cellContents: Array<number | string>, lvl: number = 0) {
     this.level = lvl;
-    this.cells = [
-      new Cell(8, "00"),
-      new Cell(2, "01"),
-      new Cell(5, "02"),
-      new Cell(6, "10"),
-      new Cell(7, "11"),
-      new Cell(3, "12"),
-      new Cell(1, "20"),
-      new Cell(4, "21"),
-      new Cell("_", "22"),
-    ];
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++)
+        this.cells.push(new Cell(cellContents[i * 3 + j], `${i}${j}`));
+    }
+
     this.movingCellIndex = this.cells.findIndex((elem) => elem.content === "_");
-    // this.sortCells();
   }
 
-  print() {
-    console.log(`\n(${this.level})`);
+  createChildState() {
+    // Extract content
+    this.sortCells();
+    const content: Array<number | string> = [];
+    this.cells.forEach((cell) => content.push(cell.content));
+
+    return new State(content, this.level + 1);
+  }
+
+  print(arg?: string) {
+    console.log(
+      arg === "parent"
+        ? chalk.yellow(`\n(${this.level})`)
+        : arg === "complete"
+        ? chalk.green(`\n(${this.level})`)
+        : `\n(${this.level})`
+    );
     let str = "";
     this.cells.forEach((cell, index) => {
       str += `${cell.content} `;
       if ((index + 1) % 3 == 0) {
-        console.log(str);
+        console.log(
+          arg === "parent"
+            ? chalk.yellow(str)
+            : arg === "complete"
+            ? chalk.green(str)
+            : str
+        );
         str = "";
       }
     });
@@ -40,35 +55,88 @@ class State {
   }
 
   move(dir: string) {
-    if (dir !== "up" && dir !== "down" && dir !== "left" && dir !== "right")
-      return console.log("invalid direction");
+    // if (dir !== "up" && dir !== "down" && dir !== "left" && dir !== "right")
+    //   return console.log("invalid direction");
 
-    const movingCell = this.cells[this.movingCellIndex];
-    if (!movingCell.canMove(dir)) return;
+    const newState = this.createChildState();
+
+    const movingCell = newState.cells[newState.movingCellIndex];
+    // if (!movingCell.canMove(dir)) return;
 
     // Find the cell to swap with the moving cell
     const cellToSwapWith = movingCell.findCellToSwapWith(dir);
 
-    console.log("moving ", dir, cellToSwapWith);
-    // console.log(this);
     // Swap ids
     const temp = movingCell.id;
     movingCell.id = cellToSwapWith.id;
-    this.cells[cellToSwapWith.index].id = temp;
+    newState.cells[cellToSwapWith.index].id = temp;
 
-    this.movingCellIndex = cellToSwapWith.index;
-    this.sortCells();
+    newState.movingCellIndex = cellToSwapWith.index;
+    newState.sortCells();
+
+    return newState;
+  }
+
+  getAllPossibleMoves(): Array<string> {
+    const possibleMoves: Array<string> = [];
+
+    const splitId = this.cells[this.movingCellIndex].id.split("");
+    const [a, b] = [parseInt(splitId[0]), parseInt(splitId[1])];
+
+    switch (a) {
+      case 0: {
+        possibleMoves.push("down");
+        break;
+      }
+      case 1: {
+        possibleMoves.push("up", "down");
+        break;
+      }
+      case 2: {
+        possibleMoves.push("up");
+        break;
+      }
+    }
+
+    switch (b) {
+      case 0:
+        possibleMoves.push("right");
+        break;
+
+      case 1:
+        possibleMoves.push("right", "left");
+        break;
+
+      case 2:
+        possibleMoves.push("left");
+        break;
+    }
+
+    const sortedPossibleMoves: Array<string> = [];
+    const order: Array<string> = ["left", "up", "down", "right"];
+
+    order.forEach((item) => {
+      possibleMoves.includes(item) && sortedPossibleMoves.push(item);
+    });
+
+    return sortedPossibleMoves;
+  }
+
+  hasSameCellsAs(cells: Array<Cell>) {
+    cells.forEach((cell, index) => {
+      if (cell.content !== this.cells[index].content) return false;
+    });
+
+    return true;
+  }
+
+  isUnique(states: Array<State>) {
+    const statesInPrevLevels = states.filter(
+      (state) => JSON.stringify(state.cells) === JSON.stringify(this.cells)
+    );
+    // statesInPrevLevels.filter(state);
+    return statesInPrevLevels.length === 0;
   }
 }
-
-const state = new State();
-
-state.print();
-state.move("up");
-state.print();
-state.move("up");
-state.print();
-state.move("left");
-state.print();
 
 export default State;
