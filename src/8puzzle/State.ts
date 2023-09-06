@@ -5,9 +5,15 @@ class State {
   cells: Cell[] = [];
   level: number;
   movingCellIndex: number;
+  parentIndex: number;
 
-  constructor(cellContents: Array<number | string>, lvl: number = 0) {
+  constructor(
+    cellContents: Array<number | string>,
+    lvl: number = 0,
+    parInd: number = -1
+  ) {
     this.level = lvl;
+    this.parentIndex = parInd;
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++)
         this.cells.push(new Cell(cellContents[i * 3 + j], `${i}${j}`));
@@ -16,13 +22,13 @@ class State {
     this.movingCellIndex = this.cells.findIndex((elem) => elem.content === "_");
   }
 
-  createChildState() {
+  createChildState(parentIndex: number) {
     // Extract content
     this.sortCells();
     const content: Array<number | string> = [];
     this.cells.forEach((cell) => content.push(cell.content));
 
-    return new State(content, this.level + 1);
+    return new State(content, this.level + 1, parentIndex);
   }
 
   print(arg?: string) {
@@ -54,11 +60,11 @@ class State {
     this.cells.sort((a, b) => parseInt(a.id) - parseInt(b.id));
   }
 
-  move(dir: string) {
+  move(dir: string, parentIndex: number) {
     // if (dir !== "up" && dir !== "down" && dir !== "left" && dir !== "right")
     //   return console.log("invalid direction");
 
-    const newState = this.createChildState();
+    const newState = this.createChildState(parentIndex);
 
     const movingCell = newState.cells[newState.movingCellIndex];
     // if (!movingCell.canMove(dir)) return;
