@@ -6,6 +6,7 @@ class State {
   level: number;
   movingCellIndex: number;
   parentIndex: number;
+  expanded: boolean = false;
 
   constructor(
     cellContents: Array<number | string>,
@@ -27,6 +28,7 @@ class State {
     this.sortCells();
     const content: Array<number | string> = [];
     this.cells.forEach((cell) => content.push(cell.content));
+    this.expanded = true;
 
     return new State(content, this.level + 1, parentIndex);
   }
@@ -137,11 +139,11 @@ class State {
   }
 
   isUnique(states: Array<State>) {
-    const statesInPrevLevels = states.filter(
+    const statesxx = states.filter(
       (state) => JSON.stringify(state.cells) === JSON.stringify(this.cells)
     );
     // statesInPrevLevels.filter(state);
-    return statesInPrevLevels.length === 0;
+    return statesxx.length === 0;
   }
 }
 
